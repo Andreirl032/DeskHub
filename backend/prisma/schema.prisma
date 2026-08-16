@@ -1,0 +1,102 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  AGENT
+  CLIENT
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_CLIENT
+  RESOLVED
+  CLOSED
+}
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relações
+  users    User[]
+  articles Article[]
+  tickets  Ticket[]
+}
+
+model User {
+  id             String   @id @default(uuid())
+  name           String
+  email          String   @unique
+  password       String?
+  role           Role     @default(CLIENT)
+  organizationId String
+  googleId       String? @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relações
+  organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  articles      Article[]
+  clientTickets Ticket[]     @relation("ClientTickets")
+  agentTickets  Ticket[]     @relation("AgentTickets")
+  messages      Message[]
+}
+
+model Article {
+  id             String   @id @default(uuid())
+  title          String
+  content        String   @db.Text
+  authorId       String
+  organizationId String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relações
+  author       User         @relation(fields: [authorId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model Ticket {
+  id             String       @id @default(uuid())
+  title          String
+  description    String       @db.Text
+  status         TicketStatus @default(OPEN)
+  clientId       String
+  agentId        String?      // Opcional: fica nulo enquanto o ticket estiver na fila
+  organizationId String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  // Relações
+  client       User         @relation("ClientTickets", fields: [clientId], references: [id])
+  agent        User?        @relation("AgentTickets", fields: [agentId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  messages     Message[]
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String   @db.Text
+  ticketId  String
+  senderId  String
+  createdAt DateTime @default(now())
+
+  // Relações
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender User   @relation(fields: [senderId], references: [id])
+}
