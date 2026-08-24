@@ -4,9 +4,7 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
-  moduleFormat    = "cjs"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -47,7 +45,7 @@ model User {
   password       String?
   role           Role     @default(CLIENT)
   organizationId String
-  googleId       String? @unique
+  googleId       String?  @unique
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -79,7 +77,7 @@ model Ticket {
   description    String       @db.Text
   status         TicketStatus @default(OPEN)
   clientId       String
-  agentId        String?      // Opcional: fica nulo enquanto o ticket estiver na fila
+  agentId        String? // Opcional: fica nulo enquanto o ticket estiver na fila
   organizationId String
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
