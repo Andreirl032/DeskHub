@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -17,22 +17,33 @@ export class OrganizationService {
     return createOrganizationDb;
   }
 
-  findAll() {
-    return `This action returns all organization`;
-  }
+  // async findAll() {
+  //   const findAllDb=this.prisma.organization.findMany({where})
+  //   return `This action returns all organization`;
+  // }
 
   async findOne(id: string) {
     const findOneDb = await this.prisma.organization.findUnique({
       where: { id: id },
     });
+    if (!findOneDb) {
+      throw new NotFoundException('Organization not found');
+    }
     return findOneDb;
   }
 
-  update(id: string, updateOrganizationDto: UpdateOrganizationDto) {
-    return `This action updates a #${id} organization`;
+  async update(id: string, updateOrganizationDto: UpdateOrganizationDto) {
+    const updateDb = await this.prisma.organization.update({
+      where: { id: id },
+      data: { name: updateOrganizationDto.name },
+    });
+    return updateDb;
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} organization`;
+  async remove(id: string) {
+    const deleteOrg = await this.prisma.organization.delete({
+      where: { id: id },
+    });
+    return deleteOrg;
   }
 }

@@ -20,10 +20,10 @@ export class OrganizationController {
     return this.organizationService.create(createOrganizationDto);
   }
 
-  @Get()
-  findAll() {
-    return this.organizationService.findAll();
-  }
+  // @Get()
+  // findAll() {
+  //   return this.organizationService.findAll();
+  // }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
